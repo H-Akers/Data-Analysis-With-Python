@@ -1,0 +1,203 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# ## Module 4
+# 
+# #### In this assignment, you will continue working on the movie data from IMDB.
+# - The data includes movies and ratings from the IMDB website
+# - Data File(s): imdb.xlsx
+# 
+# #### Data file contains 3 sheets:
+# - “imdb”: contains records of movies and ratings scraped from IMDB website
+# - “countries”: contains the country (of origin) names
+# - “directors”: contains the director names
+# 
+# We have loaded and joined the data as "df" for you. Follow the instructions and finish the rest part.
+
+# In[31]:
+
+
+###########################################################
+### EXECUTE THIS CELL BEFORE YOU TO TEST YOUR SOLUTIONS ###
+###########################################################
+
+import imp, os, sys
+sol = imp.load_compiled("solutions", "./solutions.py")
+sol.get_solutions("imdb.xlsx")
+from nose.tools import assert_equal
+from pandas.util.testing import assert_frame_equal, assert_series_equal
+
+
+# In[32]:
+
+
+# Loading the data
+import pandas as pd
+
+xls = pd.ExcelFile('imdb.xlsx')
+df = xls.parse('imdb')
+df_directors = xls.parse('directors')
+df_countries = xls.parse('countries')
+
+df = pd.merge(left=df, right=df_countries, 
+              how='inner', left_on='country_id', 
+              right_on='id')
+
+df = pd.merge(left=df, right=df_directors, 
+              how='inner', left_on='director_id', 
+              right_on='id')
+
+print("Finished.")
+
+
+# In[33]:
+
+
+""" Q1: 
+Get the summary statistics for imdb_score and gross, then use the describe() function to summarize this visually. Save the
+result in a variable called score_gross_description and print it.
+"""
+
+# your code here
+
+pivot_imdb_gross = df[['imdb_score','gross']]
+score_gross_description = pivot_imdb_gross.describe()
+
+
+# In[34]:
+
+
+assert_frame_equal(score_gross_description, sol.score_gross_description)
+print("Success!")
+
+
+# In[35]:
+
+
+"""Q2:
+What is the average rating of the director Christopher Nolan's movies? Save this value in a variable called nolan_mean and 
+print.
+"""
+
+# your code here
+#director = df["director_name"] == 'Christopher Nolan' 
+
+item_counts = df['director_name'].value_counts()
+director_with_most = item_counts.index[0]
+nolan_mean = df[df.director_name == director_with_most]
+nolan_mean = nolan_mean['imdb_score'].mean()                
+
+print(nolan_mean)
+
+
+# In[36]:
+
+
+assert_equal(nolan_mean, sol.nolan_mean)
+
+
+# In[37]:
+
+
+"""Q3: 
+Create a series called 'directors' that contains each director's name and his or her average rating.  Print out the type of your variable.
+Use the 'directors' series to find the average rating for Steven Spielberg.  Print the value.
+"""
+
+pivot_agg = pd.pivot_table(df,values=['imdb_score'], index=['director_name'])
+
+directors = pivot_agg.squeeze()
+
+
+
+
+# In[38]:
+
+
+assert_series_equal(directors, sol.directors)
+print("Success!")
+
+
+# In[39]:
+
+
+"""Q4:
+Select the non-USA movies made after 1960 by Hayao Miyazaki.
+Save the result in a DataFrame called 'miyazaki', then print it.
+
+Here are the steps:
+1. Query the data ('df' DataFrame) based on the following conditions:
+- Non-USA movies (country_id != 1)
+- Movies made after 1960 (title_year > 1960)
+- Movies made by director Hayao Miyazaki (director_id == 46)
+2. Save the filtered data in a DataFrame called 'miyazaki' and print it
+
+"""
+
+# your code here
+
+miya_d = df["director_name"] == 'Hayao Miyazaki' 
+miyazaki = df[miya_d]
+
+print(miyazaki)
+
+
+#name = df[['director_name','imdb_score']]
+#directors = name.groupby(['director_name']).mean()
+#directors = directors.reset_index()
+#directors = directors.stack()
+#print(directors,'\n')
+#print(type(directors),'\n')
+#print(directors[directors=='Steven Spielberg'],'\n')
+#print(directors[102]['imdb_score'])
+
+
+
+# In[40]:
+
+
+assert_frame_equal(miyazaki, sol.miyazaki)
+print("Success!")
+
+
+# In[46]:
+
+
+"""Q5: 
+Create a Pivot Table that shows the median rating for each director, grouped by their respective countries. Name your variable
+'pivot_agg'
+"""
+
+# your code here
+import numpy as np
+pivot_agg = pd.pivot_table(df,values=["imdb_score"], index = ['country', 'director_name'], aggfunc ='median')
+#pivot_agg = pd.pivot_table(df,values=['imdb_score'], index=['country','director_name'])
+pivot_agg
+
+
+# In[47]:
+
+
+assert_frame_equal(pivot_agg, sol.pivot_agg)
+print("Success!")
+
+
+# In[43]:
+
+
+"""Q6:
+How long did the movie Gladiator aim to keep your attention? Save the series with this information
+in a variable called 'gladiator_duration', then print it.
+"""
+
+# your code here
+gladiator_duration = df[df['movie_title']=='Gladiator']['duration']
+gladiator_duration
+
+
+# In[20]:
+
+
+assert_series_equal(gladiator_duration, sol.gladiator_duration)
+print("Success!")
+
