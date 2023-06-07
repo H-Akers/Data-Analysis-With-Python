@@ -1,5 +1,5 @@
 # Data-Analysis-With-Python
-Using Python and Pandas to analyze data in a Coursera course.
+Using Python, pandas and numpy to analyze data in a Coursera course.
 
 Lessons covered in this course
  1. Loading, Querying, and Filtering Data (csv)
